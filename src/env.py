@@ -56,6 +56,11 @@ class FlappyBirdEnv(gym.Env):
                                "gap_y": self.rng.randint(100, self.H-100)})
         reward = 0.1; terminated=False
         pipe=self._next_pipe(); pipe_center_x = pipe["x"]+26
+
+        # Encourage the bird to stay near the gap center
+        dy = abs(self.bird_y - pipe["gap_y"])
+        reward += 0.002 * (1.0 - min(dy / (self.H / 2), 1.0))
+
         if pipe_center_x < self.bird_x() <= pipe_center_x + self.pipe_speed:
             self.score += 1; reward += 1.0
         if self._collide():
@@ -78,20 +83,36 @@ class FlappyBirdEnv(gym.Env):
         return dx*dx + dy*dy <= cr*cr
 
     def _obs(self):
-        if self.pixel_obs: return self.render()
+        """Return a normalized observation vector [bird_y, bird_vel, pipe_dx, pipe_gap_y]."""
+        if self.pixel_obs:
+            return self.render()
+
         n = self._next_pipe()
-        return np.array([float(self.bird_y), float(self.bird_vel),
-                         float(n["x"]-self.bird_x()), float(n["gap_y"])], dtype=np.float32)
+
+        # Normalize values to make training easier and more stable
+        by = self.bird_y / self.H                      # 0–1
+        bv = np.tanh(self.bird_vel / 10.0)             # ~-1..1
+        dx = (n["x"] - self.bird_x()) / self.W         # 0–1
+        gy = n["gap_y"] / self.H                       # 0–1
+
+        return np.array([by, bv, dx, gy], dtype=np.float32)
 
     def render(self):
-        img = Image.new("RGB", (self.W,self.H), (135,206,235))
+        img = Image.new("RGB", (self.W, self.H), (135, 206, 235))
         d = ImageDraw.Draw(img)
-        d.rectangle([(0,self.H-70),(self.W,self.H)], fill=(222,216,149))
-        pipe_w=52
+        d.rectangle([(0, self.H - 70), (self.W, self.H)], fill=(222, 216, 149))
+        pipe_w = 52
         for p in self.pipes:
-            x=int(p["x"]); gy=int(p["gap_y"]); top_h=int(gy-self.pipe_gap/2); bot_y=int(gy+self.pipe_gap/2)
-            d.rectangle([(x,0),(x+pipe_w, top_h)], fill=(70,200,70))
-            d.rectangle([(x,bot_y),(x+pipe_w,self.H)], fill=(70,200,70))
-        bx=self.bird_x(); by=int(self.bird_y); r=self.bird_r
-        d.ellipse([(bx-r,by-r),(bx+r,by+r)], fill=(255,215,0), outline=(0,0,0))
+            x = int(p["x"])
+            gy = int(p["gap_y"])
+            top_h = int(gy - self.pipe_gap / 2)
+            bot_y = int(gy + self.pipe_gap / 2)
+            d.rectangle([(x, 0), (x + pipe_w, top_h)], fill=(70, 200, 70))
+            d.rectangle([(x, bot_y), (x + pipe_w, self.H)], fill=(70, 200, 70))
+        bx = self.bird_x()
+        by = int(self.bird_y)
+        r = self.bird_r
+        d.ellipse([(bx - r, by - r), (bx + r, by + r)], fill=(255, 215, 0), outline=(0, 0, 0))
         return np.array(img, dtype=np.uint8)
+
+
