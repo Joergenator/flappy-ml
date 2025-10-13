@@ -1,0 +1,6 @@
+numpy
+pillow
+gymnasium
+streamlit
+matplotlib
+stable-baselines3==2.3.2
