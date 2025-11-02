@@ -8,6 +8,9 @@ A ready-to-run Flappy Bird clone tailored for reinforcement learning.
 - **Training script** (`src/train_ppo.py`) for PPO with stable-baselines3
 
 ## Quickstart
+Link til program:
+https://flappy-ml-nkcoabwarmh3zj7hmqpphd.streamlit.app/ 
+
 ```bash
 python -m venv .venv
 .venv\Scripts\activate  # Windows

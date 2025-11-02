@@ -16,7 +16,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 
 st.set_page_config(page_title="Flappy RL", page_icon="🐤")
 
-st.title("Flappy RL — RL-only agent")
+st.title("FlyingBird")
 st.write("Watch a trained PPO agent (or baseline heuristic) play Flappy Bird.")
 
 # ---------- Model selection ----------
