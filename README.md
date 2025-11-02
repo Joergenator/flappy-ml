@@ -1,4 +1,4 @@
-# Flappy RL Starter
+# FlyingBird
 A ready-to-run Flappy Bird clone tailored for reinforcement learning.
 
 - **Gymnasium-like environment** (`src/env.py`) with reset/step/render
